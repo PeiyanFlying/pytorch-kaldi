@@ -852,7 +852,7 @@ class GRU(nn.Module):
         super(GRU, self).__init__()
 
         # Reading parameters
-        self.input_dim=inp_dim
+        self.input_dim=inp_dim+1
         self.gru_lay=list(map(int, options['gru_lay'].split(',')))
         self.gru_drop=list(map(float, options['gru_drop'].split(',')))
         self.gru_use_batchnorm=list(map(strtobool, options['gru_use_batchnorm'].split(',')))
@@ -910,7 +910,8 @@ class GRU(nn.Module):
              # Activations
              self.act.append(act_fun(self.gru_act[i]))
 
-             add_bias=True
+             # add_bias=True
+             add_bias = False
 
 
              if self.gru_use_laynorm[i] or self.gru_use_batchnorm[i]:
@@ -952,6 +953,9 @@ class GRU(nn.Module):
 
 
     def forward(self, x):
+
+        zero = torch.zeros(x.shape[0], x.shape[1], 1).cuda()
+        x = torch.cat((x,zero), 2)
 
         # Applying Layer/Batch Norm
         if bool(self.gru_use_laynorm_inp):
@@ -1032,7 +1036,6 @@ class GRU(nn.Module):
 
             # Setup x for the next hidden layer
             x=h
-
 
         return x
 
